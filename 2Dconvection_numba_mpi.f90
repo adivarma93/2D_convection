@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Feb 18 12:24:28 2025
 
-@author: debarshi
+
+@author: aditya
 """
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 16 21:41:30 2025
 
-@author: debarshi
+
+@author: aditya
 """
 
 import numpy as np
@@ -26,10 +25,10 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-print(f"MPI initialized: Rank={rank}, Size={size}")  # Add this
+print(f"MPI initialized: Rank={rank}, Size={size}")  # 
 
 def create_subgrid(nx_global, ny_global, rank, size, aspect_ratio=1.0):
-    """Create subgrids for parallel processing."""
+    
     x = np.linspace(0, aspect_ratio, nx_global)
     y_full = np.linspace(0, 1.0, ny_global)
 
@@ -80,7 +79,7 @@ def apply_boundary_conditions(T, psi, start, end, ny):
 
 @jit(nopython=True)
 def solve_poisson(omega, psi, dx, dy, omega_sor=1.3, tolerance=1e-6, max_iter=1000):
-    """Solve ∇²ψ = -ω using SOR with explicit Gauss-Seidel ordering."""
+    """Solve ∇²ψ = -ω using SOR """
     nx, ny = omega.shape
     dx2, dy2 = dx*dx, dy*dy
 
@@ -124,7 +123,7 @@ def calculate_velocities(psi, dx, dy):
 
 @jit(nopython=True)
 def advance_temperature(T, u, v, dx, dy, dt):
-    """Advance temperature field one timestep"""
+    """Advance temperature one timestep"""
     T_new = T.copy()
     
     # Advection-diffusion
@@ -165,7 +164,7 @@ def plot_fields(X, Y, T, psi):
 
 @jit(nopython=True)
 def calculate_dt(u, v, dx, dy, dt_max, cfl_target=0.5, INF_VAL = 1e10):
-    """Calculate timestep based on CFL condition."""
+    
     
     #Maximum velocities
     u_max = np.max(np.abs(u))
@@ -178,19 +177,16 @@ def calculate_dt(u, v, dx, dy, dt_max, cfl_target=0.5, INF_VAL = 1e10):
     dt = cfl_target * min(dt_x, dt_y)
     return min(dt, dt_max)  #Limit by dt_max
 
-def exchange_boundaries(T, comm, rank, size,nx,ny):
-    """Exchange ghost layers between MPI ranks."""
+def exchange_boundaries(T, comm, rank, size,nx,ny): #exchange ranks
+    
     #get new shape
     shape = (nx, 1)
     #now allocate memory
     recv_buffer_left = np.empty(shape, dtype=T.dtype)
     recv_buffer_right = np.empty(shape, dtype=T.dtype)
 
-    #This is important - must handle the ranks correctly to avoid deadlock
-    #It involves even and odd numbers. I've coded it for you.
-    #It might have to do with a non blocking send, or other.
-    #But this should work.
-    #The ranks must be even.
+    
+    #ranks should be even
     if size%2 != 0:
         print("Must be even!")
         return
@@ -287,10 +283,10 @@ def main():
 
         T, psi, omega, u, v = simulate_step(T, psi, omega, Ra, dx, dy, dt, start, end, comm, rank, size, nx, ny)
 
-        # Adaptive time stepping (needs reduction)
+        # Calculate dt adaptive
         dt = calculate_dt(u, v, dx, dy, dt_max, cfl_target)
 
-        # Perform a global reduction to find the minimum dt across all processes
+        # Perform a global reduction 
         dt = comm.allreduce(dt, op=MPI.MIN)
 
         # Plotting (only on rank 0)
