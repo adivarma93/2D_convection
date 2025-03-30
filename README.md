@@ -71,8 +71,8 @@ sudo apt-get install mpich
 ### Running the Serial Version
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-name>
+   git clone https://github.com/adivarma93/2D_convection.git
+   cd 2D_convection
    ```
 2. Run the script:
    ```bash
